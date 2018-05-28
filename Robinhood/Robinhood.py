@@ -1353,9 +1353,9 @@ class Robinhood:
         Returns:
             (:obj:`requests.request`): result from `orders` put command
         """
-        if order_id is str:
+        if isinstance(order_id, str):
             try:
-                order = self.session.get(self.endpoints['orders'] + order_id, timeout=15).json()
+                order = self.session.get(endpoints.orders(order_id), timeout=15).json()
             except (requests.exceptions.HTTPError) as err_msg:
                 raise ValueError('Failed to get Order for ID: ' + order_id
                     + '\n Error message: '+ repr(err_msg))
