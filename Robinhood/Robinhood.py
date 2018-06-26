@@ -112,7 +112,14 @@ class Robinhood:
 
         try:
             res = self.session.post(endpoints.login(), data=payload, timeout=15)
-            res.raise_for_status()
+            try:
+                res.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                try:
+                    self.logger.info("Failed to log in: %s", res.json())
+                except ValueError:
+                    pass
+                raise e
             data = res.json()
         except requests.exceptions.HTTPError:
             raise RH_exception.LoginFailed()
@@ -138,7 +145,14 @@ class Robinhood:
 
         try:
             req = self.session.post(endpoints.logout(), timeout=15)
-            req.raise_for_status()
+            try:
+                req.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                try:
+                    self.logger.info("Failed to log out: %s", req.json())
+                except ValueError:
+                    pass
+                raise e
         except requests.exceptions.HTTPError as err_msg:
             warnings.warn('Failed to log out ' + repr(err_msg))
 
@@ -156,7 +170,14 @@ class Robinhood:
         """Fetch investment_profile """
 
         res = self.session.get(endpoints.investment_profile(), timeout=15)
-        res.raise_for_status()  # will throw without auth
+        try:
+            res.raise_for_status()  # will throw without auth
+        except requests.exceptions.HTTPError as e:
+            try:
+                self.logger.info("Failed to fetch investment profile: %s", res.json())
+            except ValueError:
+                pass
+            raise e
         data = res.json()
 
         return data
@@ -173,7 +194,14 @@ class Robinhood:
         """
 
         res = self.session.get(endpoints.instruments(), params={'query': stock.upper()}, timeout=15)
-        res.raise_for_status()
+        try:
+            res.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            try:
+                self.logger.info("Failed to fetch instruments: %s", res.json())
+            except ValueError:
+                pass
+            raise e
         res = res.json()
 
         # if requesting all, return entire object so may paginate with ['next']
@@ -196,7 +224,14 @@ class Robinhood:
 
         try:
             req = requests.get(url, timeout=15)
-            req.raise_for_status()
+            try:
+                req.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                try:
+                    self.logger.info("Failed to fetch instrument: %s", req.json())
+                except ValueError:
+                    pass
+                raise e
             data = req.json()
         except requests.exceptions.HTTPError:
             raise RH_exception.InvalidInstrumentId()
@@ -224,7 +259,14 @@ class Robinhood:
         #Check for validity of symbol
         try:
             req = requests.get(url, timeout=15)
-            req.raise_for_status()
+            try:
+                req.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                try:
+                    self.logger.info("Failed to fetch quote data: %s", req.json())
+                except ValueError:
+                    pass
+                raise e
             data = req.json()
         except requests.exceptions.HTTPError:
             raise RH_exception.InvalidTickerSymbol()
@@ -249,7 +291,14 @@ class Robinhood:
 
         try:
             req = requests.get(url, timeout=15)
-            req.raise_for_status()
+            try:
+                req.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                try:
+                    self.logger.info("Failed to fetch quotes data: %s", req.json())
+                except ValueError:
+                    pass
+                raise e
             data = req.json()
         except requests.exceptions.HTTPError:
             raise RH_exception.InvalidTickerSymbol()
@@ -579,7 +628,14 @@ class Robinhood:
         """
 
         res = self.session.get(endpoints.accounts(), timeout=15)
-        res.raise_for_status()  # auth required
+        try:
+            res.raise_for_status()  # auth required
+        except requests.exceptions.HTTPError as e:
+            try:
+                self.logger.info("Failed to get account: %s", res.json())
+            except ValueError:
+                pass
+            raise e
         res = res.json()
 
         return res['results'][0]
@@ -652,7 +708,14 @@ class Robinhood:
         """
         if not self.oauth_token:
             res = self.session.post(endpoints.convert_token(), timeout=15)
-            res.raise_for_status()
+            try:
+                res.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                try:
+                    self.logger.info("Failed to get option market data: %s", res.json())
+                except ValueError:
+                    pass
+                raise e
             res = res.json()
             self.oauth_token = res["access_token"]
             self.headers['Authorization'] = 'Bearer ' + self.oauth_token
@@ -682,7 +745,14 @@ class Robinhood:
         #Check for validity of symbol
         try:
             req = requests.get(url, timeout=15)
-            req.raise_for_status()
+            try:
+                req.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                try:
+                    self.logger.info("Failed to get fundamentals: %s", req.json())
+                except ValueError:
+                    pass
+                raise e
             data = req.json()
         except requests.exceptions.HTTPError:
             raise RH_exception.InvalidTickerSymbol()
@@ -705,7 +775,14 @@ class Robinhood:
         """Returns the user's portfolio data """
 
         req = self.session.get(endpoints.portfolios(), timeout=15)
-        req.raise_for_status()
+        try:
+            req.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            try:
+                self.logger.info("Failed to get portfolios: %s", req.json())
+            except ValueError:
+                pass
+            raise e
 
         return req.json()['results'][0]
 
@@ -913,7 +990,14 @@ class Robinhood:
         #)
 
         res = self.session.post(endpoints.orders(), data=payload, timeout=15)
-        res.raise_for_status()
+        try:
+            res.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            try:
+                self.logger.info("Failed to get orders: %s", res.json())
+            except ValueError:
+                pass
+            raise e
 
         return res
 
@@ -1331,7 +1415,14 @@ class Robinhood:
                 payload[field] = value
 
         res = self.session.post(endpoints.orders(), data=payload, timeout=15)
-        res.raise_for_status()
+        try:
+            res.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            try:
+                self.logger.info("Failed to get orders: %s", res.json())
+            except ValueError:
+                pass
+            raise e
 
         return res
 
@@ -1365,7 +1456,14 @@ class Robinhood:
         if order.get('cancel') is not None:
             try: 
                 res = self.session.post(order['cancel'], timeout=15)
-                res.raise_for_status()
+                try:
+                    res.raise_for_status()
+                except requests.exceptions.HTTPError as e:
+                    try:
+                        self.logger.info("Failed to cancel order: %s", res.json())
+                    except ValueError:
+                        pass
+                    raise e
             except (requests.exceptions.HTTPError) as err_msg:
                 raise ValueError('Failed to cancel order ID: ' + order_id
                      + '\n Error message: '+ repr(err_msg))
