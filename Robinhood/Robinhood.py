@@ -193,7 +193,7 @@ class Robinhood:
                 (:obj:`dict`): JSON contents from `instruments` endpoint
         """
 
-        res = self.session.get(endpoints.instruments(), params={'query': stock.upper()}, timeout=15)
+        res = self.session.get(endpoints.instruments(), params={'symbol': stock.upper()}, timeout=15)
         try:
             res.raise_for_status()
         except requests.exceptions.HTTPError as e:
