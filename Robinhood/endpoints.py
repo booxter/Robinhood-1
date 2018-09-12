@@ -94,3 +94,6 @@ def market_data(optionid):
 
 def convert_token():
     return "https://api.robinhood.com/oauth2/migrate_token/"
+
+def token():
+    return "https://api.robinhood.com/oauth2/token/"

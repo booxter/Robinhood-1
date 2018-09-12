@@ -1,7 +1,9 @@
 """Robinhood.py: a collection of utilities for working with Robinhood's Private API """
 
 #Standard libraries
+import json
 import logging
+import uuid
 import warnings
 
 from enum import Enum
@@ -60,7 +62,7 @@ class Robinhood:
             "Accept": "*/*",
             "Accept-Encoding": "gzip, deflate",
             "Accept-Language": "en;q=1, fr;q=0.9, de;q=0.8, ja;q=0.7, nl;q=0.6, it;q=0.5",
-            "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
+            "Content-Type": "application/json; charset=utf-8",
             "X-Robinhood-API-Version": "1.0.0",
             "Connection": "keep-alive",
             "User-Agent": "Robinhood/823 (iPhone; iOS 7.1.2; Scale/2.00)"
@@ -721,6 +723,30 @@ class Robinhood:
             self.headers['Authorization'] = 'Bearer ' + self.oauth_token
         return self.get_url(endpoints.market_data(optionid))
 
+    def register_oauth_token(self):
+        data = {
+            # mimic webui client
+	    "client_id": "c82SH0WZOsabOXGP2sxqcj34FxkvfnWRZBKlBjFS",
+            # todo: 1000 days should be enough but maybe revisit later
+            "expires_in": 86400000,
+            "grant_type": "password",
+            "password": self.password,
+            "scope": "internal",
+            "username": self.username,
+        }
+        data = json.dumps(data)
+        res = self.session.post(endpoints.token(), data=data, timeout=15)
+        try:
+            res.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            try:
+                self.logger.info("Failed to get oauth token: %s", res.json())
+            except ValueError:
+                pass
+            raise e
+        res = res.json()
+        self.oauth_token = res["access_token"]
+        self.headers['Authorization'] = 'Bearer ' + self.oauth_token
 
     ###########################################################################
     #                           GET FUNDAMENTALS
