@@ -735,18 +735,23 @@ class Robinhood:
             "username": self.username,
         }
         data = json.dumps(data)
-        res = self.session.post(endpoints.token(), data=data, timeout=15)
+        try:
+            self.headers["Content-Type"] = "application/json; charset=utf-8"
+            res = self.session.post(endpoints.token(), data=data, timeout=15)
+        finally:
+            self.headers["Content-Type"] = "application/x-www-form-urlencoded; charset=utf-8"
         try:
             res.raise_for_status()
         except requests.exceptions.HTTPError as e:
             try:
                 self.logger.info("Failed to get oauth token: %s", res.json())
             except ValueError:
-                pass
+                return False
             raise e
         res = res.json()
         self.oauth_token = res["access_token"]
         self.headers['Authorization'] = 'Bearer ' + self.oauth_token
+        return True
 
     ###########################################################################
     #                           GET FUNDAMENTALS
