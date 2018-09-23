@@ -724,6 +724,8 @@ class Robinhood:
         return self.get_url(endpoints.market_data(optionid))
 
     def register_oauth_token(self):
+        if not self.username or not self.password:
+            return
         data = {
             # mimic webui client
 	    "client_id": "c82SH0WZOsabOXGP2sxqcj34FxkvfnWRZBKlBjFS",
